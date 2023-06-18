@@ -12,6 +12,7 @@ const API_KEY = '35888482-91687ab4dbf94420f0a7f1f80';
 const BASE_URL = 'https://pixabay.com/api/';
 
 const App = () => {
+  const [totalHits, setTotalHits] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
@@ -28,6 +29,10 @@ const App = () => {
 
   const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
+  
+    if (images.length === totalHits) {
+      setHasMoreImages(false);
+    }
   };
 
   const handleImageClick = (image) => {
@@ -45,6 +50,7 @@ const App = () => {
 
     const fetchImages = async () => {
       setIsLoading(true);
+      
 
       try {
         const response = await axios.get(
@@ -55,6 +61,7 @@ const App = () => {
           setHasMoreImages(false);
         } else {
           setImages((prevImages) => [...prevImages, ...response.data.hits]);
+          setTotalHits(response.data.totalHits);
         }
       } catch (error) {
         console.log('Error fetching images:', error);
@@ -80,8 +87,8 @@ const App = () => {
         </div>
       )}
 
-      {images.length > 0 && !isLoading && hasMoreImages && (
-        <Button onClick={handleLoadMore} images={images}/>
+      {images.length > 0 && !isLoading && hasMoreImages && images.length < totalHits && (
+        <Button onClick={handleLoadMore} totalHits={totalHits} />
       )}
 
       {selectedImage && (
